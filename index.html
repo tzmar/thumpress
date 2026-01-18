@@ -4,27 +4,43 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>TZMAREDITS Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
     body {
-      background: #000;
-      color: white;
-      font-family: 'Segoe UI', sans-serif;
-      padding: 20px;
+      background: #0f0c14;
+      color: #ffffff;
+      font-family: 'Inter', sans-serif;
+      padding: 30px 20px;
+      line-height: 1.6;
     }
     header {
       text-align: center;
-      margin-bottom: 30px;
-      padding: 20px 0;
+      margin-bottom: 40px;
+      padding: 10px 0;
     }
     h1 {
-      font-size: 2.5rem;
-      letter-spacing: 2px;
+      font-size: 2.4rem;
+      font-weight: 600;
+      letter-spacing: -0.5px;
+      background: linear-gradient(90deg, #ff00cc, #3333ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin-bottom: 8px;
+    }
+    .subtitle {
+      color: #aaa;
+      font-size: 1rem;
     }
     .gallery {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 20px;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
       max-width: 1400px;
       margin: 0 auto;
     }
@@ -34,32 +50,87 @@
       border-radius: 12px;
       display: block;
       cursor: pointer;
-      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      transition: all 0.3s ease;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
     }
     .gallery img:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 10px 25px rgba(0, 242, 255, 0.3);
+      transform: translateY(-6px);
+      box-shadow: 0 8px 20px rgba(100, 0, 255, 0.35);
+    }
+    .loading {
+      text-align: center;
+      font-size: 1.2rem;
+      color: #ccc;
+      padding: 40px;
     }
     @media (max-width: 600px) {
       .gallery {
         grid-template-columns: 1fr;
+        gap: 16px;
+      }
+      h1 {
+        font-size: 1.8rem;
       }
     }
   </style>
 </head>
 <body>
   <header>
-    <h1>MY EDITS</h1>
+    <h1>TZMAREDITS</h1>
+    <p class="subtitle">My journey in thumbnail design & visual editing</p>
   </header>
-  <div class="gallery">
-    <!-- Add your images here like this: -->
-    <!-- <img src="edit1.jpg" alt="Edit 1"> -->
 
-    <!-- Example (replace with your filenames): -->
-    <img src="edit1.jpg" alt="Edit 1">
-    <img src="edit2.jpg" alt="Edit 2">
-    <img src="edit3.jpg" alt="Edit 3">
-    <!-- Add more as needed -->
+  <div class="gallery" id="gallery">
+    <div class="loading">Loading your thumbnails...</div>
   </div>
+
+  <script>
+    // Auto-load all images from /images/ folder
+    const gallery = document.getElementById('gallery');
+    const imageFolder = 'images'; // Change this if you use a different folder
+
+    // Fetch directory listing (GitHub Pages doesn't support direct dir listing)
+    // So we'll simulate it by trying common extensions
+    const extensions = ['jpg', 'jpeg', 'png', 'webp', 'gif'];
+
+    async function loadImages() {
+      gallery.innerHTML = ''; // Clear loading message
+
+      // Try to fetch each possible image file
+      const imagePromises = [];
+      for (let i = 1; i <= 100; i++) { // Try up to 100 files
+        for (const ext of extensions) {
+          const url = `${imageFolder}/thumb${i}.${ext}`;
+          imagePromises.push(
+            fetch(url)
+              .then(res => {
+                if (res.ok) return url;
+                throw new Error('Not found');
+              })
+              .catch(() => null)
+          );
+        }
+      }
+
+      const results = await Promise.all(imagePromises);
+      const validImages = results.filter(Boolean);
+
+      if (validImages.length === 0) {
+        gallery.innerHTML = '<div class="loading">No thumbnails found. Upload images to /images/ folder.</div>';
+        return;
+      }
+
+      validImages.forEach(imgUrl => {
+        const img = document.createElement('img');
+        img.src = imgUrl;
+        img.alt = 'Thumbnail';
+        img.loading = 'lazy';
+        gallery.appendChild(img);
+      });
+    }
+
+    // For better UX: try to load images after page loads
+    window.addEventListener('load', loadImages);
+  </script>
 </body>
 </html>
